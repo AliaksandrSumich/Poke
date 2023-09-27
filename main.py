@@ -1,10 +1,11 @@
 import asyncio
-import logging
+
 import os
 
 from dotenv import load_dotenv
 
-from menu import buttons_user, menu_handler
+from database import DataBaseUsers
+from menu import buttons_user, menu_handler, none_state_message_handler
 
 load_dotenv()
 
@@ -17,22 +18,20 @@ from aiogram.utils import executor
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger('broadcast')
+users_db = DataBaseUsers()
 
-users = {}
 
 @dp.message_handler(commands=['start'], state='*')
 async def echo(message: types.Message, state: FSMContext):
     await state.finish()
+    user = [message.from_user.id, message.from_user.first_name, 'user']
+    users_db.write_new_user(user)
 
-    # await bot.send_message(text=f'Добро пожаловать! Твой телеграм ID {message.from_user.id}', chat_id=message.from_user.id)
     await buttons_user(message.from_user.id, bot, dp)
+
 
 @dp.callback_query_handler(state=None)
 async def inline_kb_answer_callback_handler(query: types.CallbackQuery, state: FSMContext):
-
-
     await query.answer()
     try:
         await query.message.delete()
@@ -40,6 +39,14 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery, state: F
         print('Кнопки были старые. Удалить не удалось.')
 
     await menu_handler(query, bot, dp)
+
+
+@dp.message_handler(state=None)
+async def echo(message: types.Message, state: FSMContext):
+    print(f'None state message {message.text} form {message.from_user.id}')
+    await none_state_message_handler(message, bot, dp)
+
+
 
 
 
