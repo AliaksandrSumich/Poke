@@ -109,6 +109,9 @@ async def new_semi_cooking_dialog(query, bot, dp: Dispatcher):
     answer_data = query.data
     semi = answer_data.replace('semi ', '')
     print(f'Semi {semi} chosen')
+    global users
+    if not users.get(query.from_user.id):
+        users = get_all_users()
     data = kitchen.start_new_semi(users[query.from_user.id], semi)
 
     text = f"Заготовка {semi}\nЭтап номер {data[headers_semi[0]]}\n{data[headers_semi[1]]}\n{data[headers_semi[4]]}"
