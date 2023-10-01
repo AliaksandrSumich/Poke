@@ -100,8 +100,13 @@ class DataBaseStat:
         return sh
 
     def get_next_semi_number(self):
-        numbers = self.stat_worksheet.get_col(2)[1:]
+        numbers = self.stat_worksheet.get_col(2,  include_tailing_empty=False)[1:]
+        print(f'numbers from database {numbers}')
         if numbers:
+
+            numbers = [int(x) for x in numbers]
+
+            print()
             return int(max(numbers)) + 1
         else:
             return 0

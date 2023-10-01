@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from database import DataBaseSemi, DataBaseStat
-from utils import find_tag
+from utils import find_tag, multiple_ingredients
 
 semi_base = DataBaseSemi()
 stat_base = DataBaseStat()
@@ -44,6 +44,15 @@ class Semi:
         stage['semi_name'] = self.semi_name
         stage['semi_number'] = self.semi_number
         stage['stage_number'] = self.current_stage
+
+        portions = find_tag(self.answers, '#количество порций')
+
+        if portions:
+
+            for key in stage.keys():
+                stage[key] = multiple_ingredients(stage[key], portions)
+
+        print(f'stage in get_actual_stage {stage}')
 
         return stage
 
@@ -115,7 +124,7 @@ class Semi:
                 effect = 1 - (float(start)-float(exit))/float(start)
             except:
                 print(f'wrong data format exit: {exit}, start {start}')
-                effect = f'wrong data format exit: {exit}, start {start}'
+                effect = 'to do'  # f'wrong data format exit: {exit}, start {start}'
         else:
             effect = f'wrong data format exit: {exit}, start {start}'
 
